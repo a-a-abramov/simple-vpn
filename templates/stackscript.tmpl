@@ -1,0 +1,47 @@
+#!/bin/bash
+# https://www.linode.com/docs/guides/writing-scripts-for-use-with-linode-stackscripts-a-tutorial/#user-defined-fields-udfs
+# <UDF name="SERVER_PRIVATEKEY" label="Wireguard server private key" >
+# <UDF name="SERVER_VPN_ADDR" label="Wireguard server VPN address with CIDR network mask" >
+# <UDF name="SERVER_PORT" label="Wireguard server port" >
+%{ for i in range(length(clientconfigs)) ~}
+# <UDF name="CLIENT_${i}_PUBLICKEY" label="Client ${i} public key" >
+# <UDF name="CLIENT_${i}_VPN_ADDR" label="Client ${i} VPN address with CIDR (usually /32)" >
+%{ endfor ~}
+# Set logger
+exec >/root/SSout 2>&1
+
+hostnamectl set-hostname simple-wg-vpn
+apt-get -q update && apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" -q -y upgrade && needrestart -ra && apt-get -q -y install wireguard ufw unattended-upgrades
+
+# Allow automatic restarts if needed in the middle of the night
+cat << EOF > /etc/apt/apt.conf.d/99custom-unattended-upgrades
+Unattended-Upgrade::Automatic-Reboot "true";
+Unattended-Upgrade::Automatic-Reboot-Time "04:00";
+EOF
+
+# Turn on IP forwarding
+# TODO IPv6 support
+echo "net.ipv4.ip_forward=1" > /etc/sysctl.d/11-ipv4-forwarding.conf
+sysctl -p /etc/sysctl.d/11-ipv4-forwarding.conf
+
+# Setup ufw
+# Wireguard adds '-A FORWARD -i <wg-interface> -j ACCEPT' itself, but denys are still beings logged by UFW,
+# since default deny on forward by UFW, so we turn off it's logging. Also for privacy reasons.
+ufw allow ssh && ufw allow 51820/udp && ufw logging off && ufw --force enable
+
+# Wireguard server configuration template. Here we use UDFs defined at the top to avoid keeping secrets in stackscript.
+cat << EOF > /etc/wireguard/wg0.conf
+[Interface]
+PrivateKey = $SERVER_PRIVATEKEY
+Address = $SERVER_VPN_ADDR
+PostUp = iptables -A FORWARD -i wg0 -j ACCEPT; iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+PostDown = iptables -D FORWARD -i wg0 -j ACCEPT; iptables -t nat -D POSTROUTING -o eth0 -j MASQUERADE
+ListenPort = $SERVER_PORT
+
+%{~ for i in range(length(clientconfigs)) }
+[Peer]
+PublicKey = $CLIENT_${i}_PUBLICKEY
+AllowedIPs = $CLIENT_${i}_VPN_ADDR
+%{ endfor ~}
+EOF
+wg-quick up wg0 && systemctl enable wg-quick@wg0

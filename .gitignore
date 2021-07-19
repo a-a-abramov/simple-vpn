@@ -33,3 +33,12 @@ override.tf.json
 # Ignore CLI configuration files
 .terraformrc
 terraform.rc
+
+# Tf lock
+.terraform.lock.hcl
+
+# Macos stuff
+.DS_Store
+
+# Resulting peer configurations
+peer-configs/*.conf
