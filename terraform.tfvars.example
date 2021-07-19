@@ -7,7 +7,7 @@ linode = {
 ssh_pubkey_path = "~/.ssh/id_ecdsa.pub"
 serverconfig = {
   name        = "server"
-  vpn_addr    = "192.168.1.1/24"
+  vpn_addr    = "192.168.99.1/24"
   port        = 51820
   private_key = "<server private key>"
   public_key  = "<server public key>"
@@ -15,13 +15,13 @@ serverconfig = {
 clientconfigs = [
   {
     name        = "james-pc"
-    vpn_addr    = "192.168.1.2/32"
+    vpn_addr    = "192.168.99.2/32"
     private_key = "<James' pc private key>"
     public_key  = "<James' pc public key>"
   },
   {
     name        = "james-phone"
-    vpn_addr    = "192.168.1.3/32"
+    vpn_addr    = "192.168.99.3/32"
     private_key = "<James' phone private key>"
     public_key  = "<James' phone public key>"
   }
