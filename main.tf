@@ -7,7 +7,7 @@ terraform {
 }
 
 provider "linode" {
-  token = var.linode.token
+  token = var.token
 }
 
 resource "linode_stackscript" "wireguard_prep" {
@@ -20,9 +20,9 @@ resource "linode_stackscript" "wireguard_prep" {
 
 resource "linode_instance" "simple-wg-vpn" {
   label           = "simple-wg-vpn"
-  image           = "linode/ubuntu21.04"
-  region          = var.linode.region
-  type            = var.linode.type
+  image           = var.image
+  region          = var.region
+  type            = var.type
   authorized_keys = [chomp(file(var.ssh_pubkey_path))]
   stackscript_id  = linode_stackscript.wireguard_prep.id
   stackscript_data = merge(

@@ -1,9 +1,5 @@
-linode = {
-  image  = "linode/ubuntu21.04"
-  region = "eu-central"
-  type   = "g6-nanode-1"
-  token  = "<Linode APIv4 token>"
-}
+region = "eu-central"
+token  = "<Linode APIv4 token>"
 ssh_pubkey_path = "~/.ssh/id_ecdsa.pub"
 serverconfig = {
   name        = "server"

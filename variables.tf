@@ -1,10 +1,20 @@
-variable "linode" {
-  type = object({
-    token  = string,
-    image  = string,
-    type   = string,
-    region = string
-  })
+variable "token" {
+  type = string
+}
+
+variable "image" {
+  type = string
+  default = "linode/ubuntu21.04"
+}
+
+variable "type" {
+  type = string
+  default = "g6-nanode-1"
+}
+
+variable "region" {
+  type = string
+  default = "eu-central"
 }
 
 variable "ssh_pubkey_path" {
