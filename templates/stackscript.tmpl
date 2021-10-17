@@ -11,7 +11,7 @@
 exec >/root/SSout 2>&1
 
 hostnamectl set-hostname simple-wg-vpn
-apt-get -q update && apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" -q -y upgrade && needrestart -ra && apt-get -q -y install wireguard ufw unattended-upgrades
+apt-get -q update && apt-get -q -y install wireguard ufw unattended-upgrades
 
 # Allow automatic restarts if needed in the middle of the night
 cat << EOF > /etc/apt/apt.conf.d/99custom-unattended-upgrades
